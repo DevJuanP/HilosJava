@@ -6,16 +6,18 @@ Proyecto sencillo en Java que aterriza la teoría de concurrencia, paralelismo e
 
 Lo que se ve en este proyecto se entiende mucho mejor con la teoría que aparece en los documentos de clase:
 
-* **Modelo 1 — Thread por cliente:** explicado en [Como una app real atiende múltiples clientes — §3 Los 3 modelos que usan los backends reales](docs/como-una-app-atiende-multiples-clientes.md#3-los-3-modelos-que-usan-los-backends-reales). Este proyecto es literalmente ese modelo: cada cliente que llega = 1 hilo nuevo.
-* **Hilos en profundidad §6.1 — Thread por cliente en detalle:** explicado en [Hilos de ejecución en profundidad — §6.1 Thread por cliente](docs/hilos-de-ejecucion-en-profundidad.md#61-thread-por-cliente). Ahí está el porqué funciona para pocos clientes y por qué se cae con 10k hilos (RAM + `context switch` + colapso de la base/disco).
+* **Modelo 1 — Thread por cliente:** explicado en [Como una app real atiende múltiples clientes — §3 Los 3 modelos que usan los backends reales](docs/teoria/como-una-app-atiende-multiples-clientes.md#3-los-3-modelos-que-usan-los-backends-reales). Este proyecto es literalmente ese modelo: cada cliente que llega = 1 hilo nuevo.
+* **Hilos en profundidad §6.1 — Thread por cliente en detalle:** explicado en [Hilos de ejecución en profundidad — §6.1 Thread por cliente](docs/teoria/hilos-de-ejecucion-en-profundidad.md#61-thread-por-cliente). Ahí está el porqué funciona para pocos clientes y por qué se cae con 10k hilos (RAM + `context switch` + colapso de la base/disco).
 
 Documentos completos en `docs/`:
 
-* [como-una-app-atiende-multiples-clientes.md](docs/como-una-app-atiende-multiples-clientes.md) — idea base del mesero, Event Loop de Node, modelos, escalado con cluster / Nginx / balanceador / pool / colas.
-* [concurrencia-vs-paralelismo.md](docs/concurrencia-vs-paralelismo.md) — definiciones, analogía del cocinero, tabla de diferencias, qué es `I/O-bound` vs `CPU-bound`.
-* [hilos-de-ejecucion-en-profundidad.md](docs/hilos-de-ejecucion-en-profundidad.md) — proceso vs hilo, scheduling, tipos de hilos, los 3 modelos de servidor en profundidad, coordinación.
+* [como-una-app-atiende-multiples-clientes.md](docs/teoria/como-una-app-atiende-multiples-clientes.md) — idea base del mesero, Event Loop de Node, modelos, escalado con cluster / Nginx / balanceador / pool / colas.
+* [concurrencia-vs-paralelismo.md](docs/teoria/concurrencia-vs-paralelismo.md) — definiciones, analogía del cocinero, tabla de diferencias, qué es `I/O-bound` vs `CPU-bound`.
+* [hilos-de-ejecucion-en-profundidad.md](docs/teoria/hilos-de-ejecucion-en-profundidad.md) — proceso vs hilo, scheduling, tipos de hilos, los 3 modelos de servidor en profundidad, coordinación.
 
 > Si solo puedes leer dos secciones, lee las dos de arriba: Modelo 1 y §6.1. Con eso todo el código de abajo cobra sentido.
+>
+> ¿Por dónde empiezo con el código? Sigue la [guía de lectura](docs/guia-lectura.md): qué archivo leer primero y en qué orden correrlo.
 
 ---
 
@@ -23,7 +25,7 @@ Documentos completos en `docs/`:
 
 Sin hilos el servidor atendería de a uno (uno espera, todos esperan). Con hilos, el servidor principal solo acepta conexiones y **delega cada cliente a un hilo independiente**, así atiende a N a la vez de forma concurrente.
 
-Es el mismo ejemplo de los docs: 4 tareas de 15, 10, 20 y 5 segundos no suman 50 segundos en secuencial, con hilos terminan en ~20 segundos (el más largo). Ver [Hilos en profundidad — §8 Ejemplo de la imagen](docs/hilos-de-ejecucion-en-profundidad.md#8-ejemplo-de-la-imagen-4-hilos-que-tardan-20-segundos-y-no-50).
+Es el mismo ejemplo de los docs: 4 tareas de 15, 10, 20 y 5 segundos no suman 50 segundos en secuencial, con hilos terminan en ~20 segundos (el más largo). Ver [Hilos en profundidad — §8 Ejemplo de la imagen](docs/teoria/hilos-de-ejecucion-en-profundidad.md#8-ejemplo-de-la-imagen-4-hilos-que-tardan-20-segundos-y-no-50).
 
 ```
 Cliente 1 \                         / pide "foto.jpg" -> hilo 1 lee disco y responde
@@ -34,9 +36,9 @@ Cliente 3 /  ServidorArchivos       \ pide "noexiste" -> hilo 3 responde -1
 
 ### Diagrama de secuencia de los hilos
 
-![Image 1: diagrama de secuencia de los hilos del servidor de archivos](docs/diagrama-hilos.png)
+![Image 1: diagrama de secuencia de los hilos del servidor de archivos](docs/diagrama/diagrama-hilos.png)
 
-> Versión interactiva (pan/zoom, temas claro/oscuro, vistas guiadas): abre [`docs/hilos-servidor-sequence.html`](docs/hilos-servidor-sequence.html) en tu navegador.
+> Versión interactiva (pan/zoom, temas claro/oscuro, vistas guiadas): abre [`docs/diagrama/hilos-servidor-sequence.html`](docs/diagrama/hilos-servidor-sequence.html) en tu navegador.
 
 ---
 
@@ -95,7 +97,7 @@ public class MiHilo implements Runnable {
 
 > Clave: `start()` crea el hilo de verdad, llamar a `run()` directo NO, solo sería una llamada normal secuencial.
 
-Esto conecta con [Hilos en profundidad — §1 Proceso vs hilo](docs/hilos-de-ejecucion-en-profundidad.md#1-proceso-vs-hilo): cada hilo tiene su `stack` y `program counter` propios, pero comparten el `heap` del proceso. Y con [§2 Corrección clave: los hilos SÍ pueden pisarse](docs/hilos-de-ejecucion-en-profundidad.md#2-correccion-clave-los-hilos-si-pueden-pisarse): si compartieran memoria sin reglas habría `race condition`.
+Esto conecta con [Hilos en profundidad — §1 Proceso vs hilo](docs/teoria/hilos-de-ejecucion-en-profundidad.md#1-proceso-vs-hilo): cada hilo tiene su `stack` y `program counter` propios, pero comparten el `heap` del proceso. Y con [§2 Corrección clave: los hilos SÍ pueden pisarse](docs/teoria/hilos-de-ejecucion-en-profundidad.md#2-correccion-clave-los-hilos-si-pueden-pisarse): si compartieran memoria sin reglas habría `race condition`.
 
 ### Paso 1 — Arrancar el servidor (`MainServidor.java`)
 
@@ -113,12 +115,12 @@ Solo lanza el servidor en el puerto `1250` en su propio hilo. A partir de aquí 
 **`src/main/java/Hilos/ServidorArchivos.java:18` — `run()`:**
 
 1. `new ServerSocket(1250)` → abre el puerto y escucha.
-2. `while(!parar){ servidor.accept(); }` → `accept()` es **bloqueante**: el hilo se queda esperando ahí sin consumir CPU. Cuando el SO recibe una conexión TCP, lo despierta. Ver [Cómo una app atiende — §1 La idea base](docs/como-una-app-atiende-multiples-clientes.md#1-la-idea-base-intercalar-muy-rapido).
+2. `while(!parar){ servidor.accept(); }` → `accept()` es **bloqueante**: el hilo se queda esperando ahí sin consumir CPU. Cuando el SO recibe una conexión TCP, lo despierta. Ver [Cómo una app atiende — §1 La idea base](docs/teoria/como-una-app-atiende-multiples-clientes.md#1-la-idea-base-intercalar-muy-rapido).
 3. Cuando llega un cliente, `accept()` devuelve un `Socket nuevoCliente`.
 4. Inmediatamente crea `new ClassThreadCliente(nuevoCliente)` y hace `start()`. **No lo atiende él, delega.**
 5. Vuelve al `accept()` a esperar al siguiente.
 
-Analogía de tus docs ([mesero](docs/como-una-app-atiende-multiples-clientes.md#1-la-idea-base-intercalar-muy-rapido) / [cocinero](docs/concurrencia-vs-paralelismo.md#1-definiciones-con-analogia)): es el mesero. No se queda en una mesa, toma el pedido y lo pasa a otro cocinero (hilo), y sigue atendiendo la puerta.
+Analogía de tus docs ([mesero](docs/teoria/como-una-app-atiende-multiples-clientes.md#1-la-idea-base-intercalar-muy-rapido) / [cocinero](docs/teoria/concurrencia-vs-paralelismo.md#1-definiciones-con-analogia)): es el mesero. No se queda en una mesa, toma el pedido y lo pasa a otro cocinero (hilo), y sigue atendiendo la puerta.
 
 Este es el punto central: sin hilos, el servidor atendería 1 por 1. Con hilos, atiende a N a la vez.
 
@@ -151,9 +153,9 @@ En `run():15`:
 
 ## 4. Cómo aterriza la teoría en este código
 
-* **Concurrencia vs paralelismo:** esto es concurrencia para `I/O-bound`. La mayoría del tiempo los hilos están **bloqueados** esperando red o disco, no calculando. Por eso con 4 núcleos puedes tener 20 clientes avanzando intercalados. Ver [Concurrencia vs paralelismo — §2, §3 y §7](docs/concurrencia-vs-paralelismo.md#2-concurrencia-en-detalle). La pregunta diagnóstico de tus docs aplica aquí: ¿el hilo pasa el tiempo esperando o calculando? Aquí esperando → hilos sí ayudan.
-* **Proceso vs hilo + scheduling:** con 8 núcleos y 500 hilos, el SO hace `time slicing` y `context switch`. Solo hay paralelismo real cuando 2 hilos están en 2 núcleos distintos al mismo instante. Ver [Hilos en profundidad — §3 y §4](docs/hilos-de-ejecucion-en-profundidad.md#3-como-la-cpu-ejecuta-cientos-de-hilos-con-pocos-nucleos).
-* **Por qué no escala:** este es el modelo viejo Apache/PHP clásico. Funciona en clase con 5 clientes, pero con 10k clientes = 10k hilos = ~10GB solo en stacks + muchísimo `context switch`. En producción no se hace `new Thread()` por cliente, se usa pool limitado (`ExecutorService` con 200 hilos + cola, si se llena se responde 503), `Virtual Threads` de Java 21, o `Event Loop` como Node/Nginx. Ver [Hilos en profundidad — §5 Tipos de hilos y §6 Los tres modelos](docs/hilos-de-ejecucion-en-profundidad.md#5-tipos-de-hilos-que-existen) y [Cómo una app atiende — §4 Cuando un proceso ya no alcanza](docs/como-una-app-atiende-multiples-clientes.md#4-cuando-un-proceso-ya-no-alcanza-escalar).
+* **Concurrencia vs paralelismo:** esto es concurrencia para `I/O-bound`. La mayoría del tiempo los hilos están **bloqueados** esperando red o disco, no calculando. Por eso con 4 núcleos puedes tener 20 clientes avanzando intercalados. Ver [Concurrencia vs paralelismo — §2, §3 y §7](docs/teoria/concurrencia-vs-paralelismo.md#2-concurrencia-en-detalle). La pregunta diagnóstico de tus docs aplica aquí: ¿el hilo pasa el tiempo esperando o calculando? Aquí esperando → hilos sí ayudan.
+* **Proceso vs hilo + scheduling:** con 8 núcleos y 500 hilos, el SO hace `time slicing` y `context switch`. Solo hay paralelismo real cuando 2 hilos están en 2 núcleos distintos al mismo instante. Ver [Hilos en profundidad — §3 y §4](docs/teoria/hilos-de-ejecucion-en-profundidad.md#3-como-la-cpu-ejecuta-cientos-de-hilos-con-pocos-nucleos).
+* **Por qué no escala:** este es el modelo viejo Apache/PHP clásico. Funciona en clase con 5 clientes, pero con 10k clientes = 10k hilos = ~10GB solo en stacks + muchísimo `context switch`. En producción no se hace `new Thread()` por cliente, se usa pool limitado (`ExecutorService` con 200 hilos + cola, si se llena se responde 503), `Virtual Threads` de Java 21, o `Event Loop` como Node/Nginx. Ver [Hilos en profundidad — §5 Tipos de hilos y §6 Los tres modelos](docs/teoria/hilos-de-ejecucion-en-profundidad.md#5-tipos-de-hilos-que-existen) y [Cómo una app atiende — §4 Cuando un proceso ya no alcanza](docs/teoria/como-una-app-atiende-multiples-clientes.md#4-cuando-un-proceso-ya-no-alcanza-escalar).
 
 ---
 
@@ -211,8 +213,8 @@ Por defecto IntelliJ reutiliza la misma pestaña de Run para cada ejecución. Pa
 
 1. Ruta quemada `C:\cibertec\` en cliente y servidor — no es portable.
 2. `pararServidor()` nunca se llama, el `while(!parar)` es infinito y el `servidor.close()` de `ServidorArchivos.java:30` es inalcanzable.
-3. Sin pool: un ataque simple creando conexiones lo tumba. Faltaría `ExecutorService` o `Virtual Threads`. Ver [§6.1 problemas](docs/hilos-de-ejecucion-en-profundidad.md#61-thread-por-cliente).
-4. Sin `pool de conexiones`, sin `stateless`, sin `cola` — todo lo que en producción se hace según [§4 y §5 de Cómo atiende una app](docs/como-una-app-atiende-multiples-clientes.md#5-arquitectura-tipica-real).
+3. Sin pool: un ataque simple creando conexiones lo tumba. Faltaría `ExecutorService` o `Virtual Threads`. Ver [§6.1 problemas](docs/teoria/hilos-de-ejecucion-en-profundidad.md#61-thread-por-cliente).
+4. Sin `pool de conexiones`, sin `stateless`, sin `cola` — todo lo que en producción se hace según [§4 y §5 de Cómo atiende una app](docs/teoria/como-una-app-atiende-multiples-clientes.md#5-arquitectura-tipica-real).
 5. `org/example/Main.java` es el Hello World por defecto de Maven, no se usa.
 6. El `while(!parar)` de `ClassThreadCliente.java:21` sugiere múltiples pedidos por conexión, pero `Cliente.java` cierra tras 1 archivo, así que siempre termina por excepción.
 
@@ -220,7 +222,7 @@ Por defecto IntelliJ reutiliza la misma pestaña de Run para cada ejecución. Pa
 
 ## 7. Glosario rápido para el examen
 
-Ver definiciones completas en [Concurrencia vs paralelismo — §8 Otra jerga](docs/concurrencia-vs-paralelismo.md#8-otra-jerga-del-tema) y [Hilos — §7 Cómo se coordinan](docs/hilos-de-ejecucion-en-profundidad.md#7-como-se-coordinan-los-hilos-sin-romperse).
+Ver definiciones completas en [Concurrencia vs paralelismo — §8 Otra jerga](docs/teoria/concurrencia-vs-paralelismo.md#8-otra-jerga-del-tema) y [Hilos — §7 Cómo se coordinan](docs/teoria/hilos-de-ejecucion-en-profundidad.md#7-como-se-coordinan-los-hilos-sin-romperse).
 
 * **Blocking / Non-blocking:** `accept()` y `readUTF()` aquí son bloqueantes.
 * **Thread / Process:** `ServidorArchivos` y cada `ClassThreadCliente` son hilos del mismo proceso Java.
