@@ -1,0 +1,4 @@
+Hola Cibertec!
+Este es el archivo de prueba para el proyecto HilosJava.
+Si el cliente pide "prueba.txt", el servidor (ClassThreadCliente) lo busca en C:\Cibertec\ y lo envia por sockets en bloques de 8192 bytes.
+Pide este archivo desde el Cliente escribiendo exactamente: prueba.txt

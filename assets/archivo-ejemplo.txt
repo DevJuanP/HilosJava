@@ -1,0 +1,12 @@
+Archivo de ejemplo 2 - HilosJava DSW II
+=====================================
+Este archivo sirve para probar que el servidor atiende a multiples clientes a la vez.
+
+Como probarlo:
+1. Arranca MainServidor (puerto 1250).
+2. Abre 2 terminales con Cliente.
+3. En uno pide: prueba.txt
+4. En otro pide: archivo-ejemplo.txt
+5. Ambos deben recibirse sin bloquearse, cada uno en su hilo (ClassThreadCliente).
+
+Modelo usado: thread-por-cliente. Ver docs/como-una-app-atiende-multiples-clientes.md y docs/hilos-de-ejecucion-en-profundidad.md 6.1

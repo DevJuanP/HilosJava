@@ -155,11 +155,16 @@ En `run():15`:
 
 Requisitos: Java 17, Maven, Windows (por las rutas quemadas).
 
+> Nota de versión: el profesor lo hizo con Java 17. Si tienes algún problema, baja a Java 17; pero debería correr igual con Java 21 o cualquier Java más moderno (el código solo usa APIs básicas de hilos y sockets).
+
 1. Crear carpeta `C:\Cibertec\` en tu PC (tal como pidió el profesor en clase).
-2. Poner ahí un archivo de prueba en el lado servidor. Ya están creados y probados:
-   * `C:\Cibertec\prueba.txt` (283 bytes, 1 chunk — prueba rápida).
-   * `C:\Cibertec\archivo-ejemplo.txt` (para probar 2 clientes a la vez).
-   * `C:\Cibertec\documento-grande.txt` (~63 KB, 8 chunks de 8192 — para ver varios `bytesReceived` en consola).
+2. Copiar ahí los archivos de prueba que vienen en la carpeta [`assets/`](assets/) de este repo:
+   * `prueba.txt` (283 bytes, 1 chunk — prueba rápida).
+   * `archivo-ejemplo.txt` (535 bytes — para probar 2 clientes a la vez).
+   * `documento-grande.txt` (~63 KB, 8 chunks de 8192 — para ver varios `bytesReceived` en consola).
+   ```bash
+   copy assets\*.txt C:\Cibertec\
+   ```
 3. Terminal 1 — arrancar servidor:
    ```bash
    mvn compile exec:java -Dexec.mainClass="Hilos.MainServidor"
@@ -173,6 +178,26 @@ Requisitos: Java 17, Maven, Windows (por las rutas quemadas).
    # Verás los bytes por chunk y "Archivo recibido correctamente"
    ```
 5. Abre 2-3 clientes a la vez para ver la concurrencia: el servidor no se bloquea, cada uno tiene su hilo (`Client:... ha solicitado el archivo...` / `archivo enviado correctamente`).
+
+### Ver 2 clientes a la vez en IntelliJ (split de consola)
+
+Por defecto IntelliJ reutiliza la misma pestaña de Run para cada ejecución. Para ver servidor + 2 clientes lado a lado como en clase:
+
+1. `Run → Edit Configurations...` → selecciona la config de `Cliente`.
+2. Clic en `Modify options` → marca **`Allow multiple instances`** (en versiones nuevas se llama **`Allow parallel run`**).
+3. `Apply → OK`. Cada `Run 'Cliente.main()'` abre una pestaña nueva (`Cliente`, `Cliente (1)`, ...).
+4. Clic derecho sobre una pestaña de Run → `Split Right` / `Split Down` para verlas en paralelo.
+
+### Qué pedir en cada cliente (guía de pruebas)
+
+| Cliente | Escribir | Resultado esperado |
+| :--- | :--- | :--- |
+| 1 | `prueba.txt` | `283` / `Archivo recibido correctamente` |
+| 2 | `archivo-ejemplo.txt` | `535` / `Archivo recibido correctamente` |
+| 3 | `documento-grande.txt` | 8 chunks (`8192` x7 + `7608`) / `Archivo recibido correctamente` |
+| error | `noexiste.txt` | `El archivo solicitado no existe` (el servidor responde `-1`) |
+
+> Ojo: como en `localhost` el servidor y el cliente usan la **misma** carpeta `C:\Cibertec\`, el archivo descargado sobrescribe al original con contenido idéntico (normal, no es error). Pero cuidado con `documento-grande.txt`: si la transferencia se interrumpe a la mitad, el original queda trunco — si pasa, recupéralo copiándolo de nuevo desde `assets/`.
 
 ---
 
