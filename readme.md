@@ -32,6 +32,12 @@ Cliente 3 /  ServidorArchivos       \ pide "noexiste" -> hilo 3 responde -1
          accept() en loop, por cada accept() => new ClassThreadCliente(socket).start()
 ```
 
+### Diagrama de secuencia de los hilos
+
+![Image 1: diagrama de secuencia de los hilos del servidor de archivos](docs/diagrama-hilos.png)
+
+> Versión interactiva (pan/zoom, temas claro/oscuro, vistas guiadas): abre [`docs/hilos-servidor-sequence.html`](docs/hilos-servidor-sequence.html) en tu navegador.
+
 ---
 
 ## 2. Estructura del proyecto
