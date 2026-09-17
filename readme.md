@@ -38,7 +38,7 @@ Cliente 3 /  ServidorArchivos       \ pide "noexiste" -> hilo 3 responde -1
 
 ![Image 1: diagrama de secuencia de los hilos del servidor de archivos](docs/diagrama/diagrama-hilos.png)
 
-> Versión interactiva (pan/zoom, temas claro/oscuro, vistas guiadas): abre [`docs/diagrama/hilos-servidor-sequence.html`](docs/diagrama/hilos-servidor-sequence.html) en tu navegador.
+> Versión interactiva de la Imagen 1 (pan/zoom, temas claro/oscuro, vistas guiadas), hecha con Archify: mírala en [comfy-monstera-f50c5b.netlify.app](https://comfy-monstera-f50c5b.netlify.app/) o abre [`docs/diagrama/hilos-servidor-sequence.html`](docs/diagrama/hilos-servidor-sequence.html) en tu navegador.
 
 ---
 
